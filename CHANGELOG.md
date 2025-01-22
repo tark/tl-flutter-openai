@@ -1,5 +1,9 @@
 ## 1.0.1+2
 
+- Start implementing chat completions
+
+## 1.0.1+2
+
 - Updated the `README.md` file.
 
 ## 1.0.0+1 
