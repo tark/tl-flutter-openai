@@ -43,7 +43,7 @@ class MainInterceptor implements InterceptorsWrapper {
   }
 
   @override
-  Future onError(DioError error, ErrorInterceptorHandler handler) async {
+  Future onError(DioException error, ErrorInterceptorHandler handler) async {
     /*
     l('onError', '---------');
     l('onError', error.type);
