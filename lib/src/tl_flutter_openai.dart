@@ -1,3 +1,5 @@
+import 'package:tl_flutter_openai/src/models/models.dart';
+
 import 'api/api.dart';
 
 class TlFlutterOpenAI {
@@ -18,7 +20,7 @@ class TlFlutterOpenAI {
   final String? projectId;
   late final Api _api;
 
-  Future<dynamic> createChatCompletion() async {
-    // TBD
+  Future<dynamic> createChatCompletion(ChatCompletionRequest request) async {
+    return _api.createChatCompletion(request);
   }
 }
