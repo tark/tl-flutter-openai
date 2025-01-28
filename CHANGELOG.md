@@ -1,3 +1,7 @@
+## 1.0.3+4
+
+- Implementing chat completions
+
 ## 1.0.2+3
 
 - Start implementing chat completions
