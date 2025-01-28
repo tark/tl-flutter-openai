@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../config/constants.dart';
+import '../models/models.dart';
 import '../util/log.dart';
 import 'main_interceptor.dart';
 
@@ -31,18 +32,14 @@ class Api {
   final String? projectId;
   late final Dio _dio;
 
-  Future<dynamic> createChatCompletion() async {
+  Future<dynamic> createChatCompletion(ChatCompletionRequest request) async {
     final response = await _post(
       'chat/completions',
-      body: {
-        'prompt': 'Once upon a time',
-        'max_tokens': 5,
-      },
+      body: request.toJson(),
     );
   }
 
   //
-
   Future<dynamic> _get(
     String path, {
     Map<String, dynamic>? query,
