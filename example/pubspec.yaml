@@ -1,0 +1,27 @@
+name: example
+description: TL Flutter OpenAI library example
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  tl_flutter_openai:
+    path: ../
+  flutter_dotenv: ^5.2.1
+
+dev_dependencies:
+  build_runner: ^2.4.6
+  lints: ^3.0.0
+  test: ^1.24.9
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
