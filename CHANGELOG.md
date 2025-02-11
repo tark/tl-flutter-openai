@@ -1,3 +1,7 @@
+## 1.0.4+5
+
+- Add example project
+
 ## 1.0.3+4
 
 - Implementing chat completions
