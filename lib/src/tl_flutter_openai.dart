@@ -2,8 +2,8 @@ import 'package:tl_flutter_openai/src/models/models.dart';
 
 import 'api/api.dart';
 
-class TlFlutterOpenAI {
-  TlFlutterOpenAI({
+class OpenAI {
+  OpenAI({
     required this.apiKey,
     this.organizationId,
     this.projectId,
