@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tl_flutter_openai/tl_flutter_openai.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 
 final backgroundColor = Colors.grey[800];
 final cardBackgroundColor = Colors.grey[700];
-final primaryColor = Colors.white;
 final inputColor = Colors.grey[800];
-final textColorSecondary = Colors.white54;
+final textColorSecondary = Colors.white38;
+final textColorPrimary = Colors.white;
 final accentColor = Colors.blue;
-
-class Message {
-  final bool isMine;
-  final String text;
-
-  Message({
-    required this.isMine,
-    required this.text,
-  });
-}
 
 class ChatCompletionScreen extends StatefulWidget {
   const ChatCompletionScreen({super.key});
@@ -35,6 +28,26 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   bool _showScrollToBottomButton = false;
   var _messages = <Message>[];
   var _sending = false;
+  final _openAI = OpenAI(
+    apiKey: dotenv.env['OPENAI_API_KEY'] ?? '',
+  );
+  var _multilineMessageEntered = false;
+
+  @override
+  void initState() {
+    _messageController.addListener(() {
+      final hasText = _messageController.text.isNotEmpty;
+      if (hasText != _hasText) {
+        setState(() => _hasText = hasText);
+      }
+
+      final multilineMessageEntered = _messageController.text.contains('\n');
+      if (multilineMessageEntered != _multilineMessageEntered) {
+        setState(() => _multilineMessageEntered = multilineMessageEntered);
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +87,16 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   Widget _messagesList() {
     if (_messages.isEmpty) {
       return Center(
-        child: Text('Send your first message'),
+        child: SizedBox(
+          width: 240,
+          child: Text(
+            'This is an example of how chat completion works. Type a message and press send to get a response.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColorSecondary,
+            ),
+          ),
+        ),
       );
     }
 
@@ -83,7 +105,9 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         ListView.separated(
           reverse: true,
           controller: _scrollController,
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+          ),
           itemCount: _messages.length,
           separatorBuilder: (c, i) => const SizedBox(height: 8),
           itemBuilder: (c, i) => _messageItem(_messages[i]),
@@ -129,9 +153,9 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   }
 
   Widget _messageItem(Message message) {
-    final text = message.text ?? '';
+    final text = message.content ?? '';
     final isShort = text.length < 30 && !text.contains('\n');
-    final isSender = message.isMine;
+    final isSender = message.role == 'user';
     final isEmpty = text.isEmpty;
 
     if (isEmpty) {
@@ -144,7 +168,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
           isShort
               ? const Spacer()
               : const SizedBox(
-                  width: 100,
+                  width: 50,
                 ),
         if (isShort)
           _messageBody(message, isSender, isShort)
@@ -156,7 +180,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
           isShort
               ? const Spacer()
               : const SizedBox(
-                  width: 100,
+                  width: 50,
                 ),
       ],
     );
@@ -167,7 +191,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
     bool isSender,
     bool isShort,
   ) {
-    final text = message.text ?? '';
+    final text = message.content ?? '';
     if (text.isEmpty) {
       return Container();
     }
@@ -177,15 +201,23 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
     final lastLineIsFull = (linesCount - linesCount.floor()) > 0.7;
 
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 16,
+      ),
       decoration: BoxDecoration(
-        color: isSender ? primaryColor : cardBackgroundColor,
+        color: isSender ? Colors.blue.withAlpha(150) : inputColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: isShort
           ? Row(
               children: [
-                Text(text),
+                GptMarkdown(
+                  text,
+                  style: TextStyle(
+                    color: isSender ? textColorPrimary : textColorPrimary,
+                  ),
+                ),
               ],
             )
           : Stack(
@@ -196,9 +228,13 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
                           bottom: 16,
                         )
                       : EdgeInsets.all(0),
-                  child: Text(
+                  child: GptMarkdown(
                     text,
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1000,
+                    style: TextStyle(
+                      color: isSender ? textColorPrimary : textColorPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -217,7 +253,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
           children: [
             Column(
               children: [
-                Text("Chat is empty"),
+                Text('Chat is empty'),
               ],
             ),
           ],
@@ -232,14 +268,14 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         Padding(
           padding: EdgeInsets.all(16),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   decoration: BoxDecoration(
                     color: inputColor,
                     borderRadius: BorderRadius.circular(
-                      _messageController.text.contains('\n') ? 20 : 40,
+                      _multilineMessageEntered ? 20 : 40,
                     ),
                   ),
                   child: Row(
@@ -248,9 +284,10 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
                         child: TextField(
                           controller: _messageController,
                           focusNode: _focusNode,
-                          cursorColor: primaryColor,
+                          cursorColor: textColorPrimary,
                           style: TextStyle(
-                            color: primaryColor,
+                            color: textColorPrimary,
+                            fontSize: 14,
                           ),
                           minLines: 1,
                           maxLines: 6,
@@ -262,8 +299,8 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
                               fontWeight: FontWeight.w400,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              vertical: 5.0,
-                              horizontal: 10.0,
+                              vertical: 10.0,
+                              horizontal: 16.0,
                             ),
                             border: InputBorder.none,
                           ),
@@ -287,7 +324,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
                   ),
                   icon: Icon(
                     Icons.arrow_upward,
-                    color: Colors.white,
+                    color: _hasText ? Colors.white : Colors.white38,
                     size: 20,
                   ),
                   onPressed: _hasText ? _onSendPressed : null,
@@ -301,18 +338,41 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   }
 
   Future _onSendPressed() async {
+    print('_onSendPressed');
     final text = _messageController.text;
     if (text.isEmpty) {
+      print('_onSendPressed - return');
       return;
     }
 
     try {
       setState(() => _sending = true);
+
+      final message = UserMessage(
+        name: 'Airon',
+        content: text,
+      );
+
+      setState(() => _messages = [message, ..._messages]);
       _messageController.clear();
       _scrollToBottom();
 
       // todo change to chatCompletion
       // await _chatCubit.sendMessage(_threadId, text);
+      final response = await _openAI.createChatCompletion(ChatCompletionRequest(
+        messages: [message],
+        model: AIModel.chatgpt4oLatest,
+      ));
+
+      print('_onSendPressed - response: ${response.toJson()}');
+      final responseMessage = response.choices?.first.message;
+
+      if (responseMessage == null) {
+        showError(context, 'Response message is null');
+        return;
+      }
+
+      setState(() => _messages = [responseMessage, ..._messages]);
     } catch (e, stack) {
       print('_onSendPressed - ${e}, ${stack}');
       showError(context, e.toString());
