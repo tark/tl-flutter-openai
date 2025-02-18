@@ -1,3 +1,7 @@
+## 1.0.5+5
+
+- Added chat completion example
+
 ## 1.0.4+5
 
 - Add example project
