@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 
+import '../util/log.dart';
+
 class ServerErrorStatus {
   static const unauthorized = 1;
   static const error = 2;
@@ -23,6 +25,7 @@ class MainInterceptor implements InterceptorsWrapper {
     // t('onRequest', '---------');
     // t('onRequest', '${options.method}: ${options.baseUrl}${options.path}');
     // t('onRequest', options.data);
+    // t('onRequest', options.headers);
     // t('onRequest', '---------');
 
     return handler.next(options);
@@ -38,18 +41,19 @@ class MainInterceptor implements InterceptorsWrapper {
     // s('onResponse - ${o.method}: ${o.baseUrl}${o.path}');
     // s('onResponse - $response');
     // s('onResponse - ---------');
-
     return handler.next(response);
   }
 
   @override
   Future onError(DioException error, ErrorInterceptorHandler handler) async {
-    /*
-    l('onError', '---------');
-    l('onError', error.type);
-    l('onError', error.stackTrace);
-    l('onError', '---------');
-    */
+
+    // l('onError', '---------');
+    // l('onError', 'type      ', error.type);
+    // l('onError', error.stackTrace);
+    // l('onError', 'error     ', error.error);
+    // l('onError', 'message   ', error.message);
+    // l('onError', 'response  ', error.response);
+    // l('onError', '---------');
     return handler.next(error);
   }
 }
