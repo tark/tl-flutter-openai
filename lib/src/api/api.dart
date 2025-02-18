@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 
+import '../../tl_flutter_openai.dart';
 import '../config/constants.dart';
+import '../models/chat_completion_response.dart';
 import '../models/models.dart';
 import '../util/log.dart';
 import 'main_interceptor.dart';
@@ -13,16 +15,15 @@ class Api {
   }) {
     _dio = Dio(
       BaseOptions(
-          baseUrl: openAiBaseUrl,
-          connectTimeout: const Duration(seconds: 60),
-          receiveTimeout: const Duration(seconds: 60),
-          headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-            'OpenAI-Organization': '$organizationId',
-            'OpenAI-Project': '$projectId',
-          }),
+        baseUrl: openAiBaseUrl,
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $apiKey',
+          if (organizationId != null) 'OpenAI-Organization': '$organizationId',
+          if (projectId != null) 'OpenAI-Project': '$projectId',
+        },
+      ),
     );
     _dio.interceptors.add(MainInterceptor());
   }
@@ -32,11 +33,20 @@ class Api {
   final String? projectId;
   late final Dio _dio;
 
-  Future<dynamic> createChatCompletion(ChatCompletionRequest request) async {
+  Future<ChatCompletionResponse> createChatCompletion(ChatCompletionRequest request) async {
+    l('createChatCompletion', 'request:               ${request.toJson()}');
+    l('createChatCompletion', 'request first message: ${request.messages.first.toJson()}');
+
+    final x = UserMessage(content: '');
+    x.toJson();
+
     final response = await _post(
       'chat/completions',
       body: request.toJson(),
     );
+    l('createChatCompletion - response: $response');
+
+    return ChatCompletionResponse.fromJson(response ?? {});
   }
 
   //
