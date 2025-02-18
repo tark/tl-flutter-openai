@@ -8,11 +8,6 @@ import 'package:tl_flutter_openai/tl_flutter_openai.dart';
 
 Future<void> main() async {
   await dotenv.load();
-
-  final openAI = OpenAI(
-    apiKey: dotenv.env['OPENAI_API_KEY'] ?? '',
-  );
-
   runApp(MyApp());
 }
 
