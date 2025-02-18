@@ -1,210 +1,62 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../tl_flutter_openai.dart';
 
 part 'models.g.dart';
 
-@JsonSerializable()
-class Message {
-
-  Message();
-
-  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MessageToJson(this);
-
-}
-
 enum MessageRoles { developer, system, user, assistant, tool }
 
-@JsonSerializable()
+enum AIModel {
+  @JsonValue('o1-mini')
+  o1Mini('o1-mini'),
+  @JsonValue('o1-preview')
+  o1Preview('o1-preview'),
+  @JsonValue('gpt-4o')
+  gpt4o('gpt-4o'),
+  @JsonValue('gpt-4o-mini')
+  gpt4oMini('gpt-4o-mini'),
+  @JsonValue('gpt-4o-audio-preview')
+  gpt4oAudioPreview('gpt-4o-audio-preview'),
+  @JsonValue('gpt-4o-mini-audio-preview')
+  gpt4oMiniAudioPreview('gpt-4o-mini-audio-preview'),
+  @JsonValue('gpt-4turbo-preview')
+  gpt4turboPreview('gpt-4-turbo-preview'),
+  @JsonValue('gpt-4-turbo')
+  gpt4turbo('gpt-4-turbo'),
+  @JsonValue('gpt-4')
+  gpt4('gpt-4'),
+  @JsonValue('chatgpt-4o-latest')
+  chatgpt4oLatest('chatgpt-4o-latest'),
+  @JsonValue('gpt-3.5-turbo')
+  gpt35Turbo('gpt-3.5-turbo');
+
+  final String value;
+
+  const AIModel(this.value);
+
+  @override
+  String toString() => value;
+}
+
+@JsonSerializable(explicitToJson: true)
 class ChatCompletionRequest {
   final List<Message> messages;
-  final String model;
-  final bool? store;
-  // final String? reasoningEffort;
-  // final Map<String, dynamic>? metadata;
-  // final double? frequencyPenalty;
-  // final Map<int, int>? logitBias;
-  // final bool? logprobs;
-  // final int? topLogprobs;
-  // final int? maxCompletionTokens;
-  // final int? n;
-  // final List<String>? modalities;
-  // final Prediction? prediction;
-  // final double? presencePenalty;
-  // final ResponseFormat? responseFormat;
-  // final int? seed;
-  // final String? serviceTier;
-  // final dynamic stop;
-  // final bool? stream;
-  // final StreamOptions? streamOptions;
-  // final double? temperature;
-  // final double? topP;
-  // final List<String>? tools;
-  // final ToolChoice? toolChoice;
-  // final bool? parallelToolCalls;
-  // final String? user;
+  final AIModel model;
+  final bool store;
 
   ChatCompletionRequest({
     required this.messages,
     required this.model,
-    this.store,
-    // this.reasoningEffort,
-    // this.metadata,
-    // this.frequencyPenalty,
-    // this.logitBias,
-    // this.logprobs,
-    // this.topLogprobs,
-    // this.maxCompletionTokens,
-    // this.n,
-    // this.modalities,
-    // this.prediction,
-    // this.presencePenalty,
-    // this.responseFormat,
-    // this.seed,
-    // this.serviceTier,
-    // this.stop,
-    // this.stream,
-    // this.streamOptions,
-    // this.temperature,
-    // this.topP,
-    // this.tools,
-    // this.toolChoice,
-    // this.parallelToolCalls,
-    // this.user,
+    this.store = false,
   });
 
-  factory ChatCompletionRequest.fromJson(Map<String, dynamic> json) => _$ChatCompletionRequestFromJson(json);
+  factory ChatCompletionRequest.fromJson(Map<String, dynamic> json) =>
+      _$ChatCompletionRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$ChatCompletionRequestToJson(this);
 }
 
-@JsonSerializable()
-class DeveloperMessage extends Message {
-  final String content;
-  final String role;
-  final String? name;
-
-  DeveloperMessage({
-    required this.content,
-    required this.role,
-    this.name,
-  });
-
-  factory DeveloperMessage.fromJson(Map<String, dynamic> json) => _$DeveloperMessageFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$DeveloperMessageToJson(this);
-
-}
-
-@JsonSerializable()
-class SystemMessage extends Message {
-  final String content;
-  final String role;
-  final String? name;
-
-  SystemMessage({
-    required this.content,
-    required this.role,
-    this.name,
-  });
-
-  factory SystemMessage.fromJson(Map<String, dynamic> json) => _$SystemMessageFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$SystemMessageToJson(this);
-}
-
-@JsonSerializable()
-class UserMessage extends Message {
-  final String content;
-  final String role;
-  final String? name;
-
-  UserMessage({
-    required this.content,
-    required this.role,
-    this.name,
-  });
-
-  factory UserMessage.fromJson(Map<String, dynamic> json) => _$UserMessageFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$UserMessageToJson(this);
-}
-
-@JsonSerializable()
-class AssistantMessage extends Message {
-  final String role;
-  final String? content;
-  final String? refusal;
-  final String? name;
-  final AssistantMessageAudio? audio;
-  final List<ToolCall>? toolCalls;
-
-  AssistantMessage({
-    required this.role,
-    this.content,
-    this.refusal,
-    this.name,
-    this.audio,
-    this.toolCalls,
-  });
-
-  factory AssistantMessage.fromJson(Map<String, dynamic> json) => _$AssistantMessageFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$AssistantMessageToJson(this);
-}
-
-@JsonSerializable()
-class AssistantMessageAudio extends Message {
-  final String id;
-
-  AssistantMessageAudio({
-    required this.id,
-
-  });
-
-  factory AssistantMessageAudio.fromJson(Map<String, dynamic> json) => _$AssistantMessageAudioFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$AssistantMessageAudioToJson(this);
-}
-
-@JsonSerializable()
-class ToolCall extends Message {
-  final String id;
-  final String type;
-  final ToolCallFunction function;
-
-  ToolCall({
-    required this.id,
-    required this.type,
-    required this.function,
-  });
-
-  factory ToolCall.fromJson(Map<String, dynamic> json) => _$ToolCallFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ToolCallToJson(this);
-}
-
-@JsonSerializable()
-class ToolCallFunction extends Message {
-  final String name;
-  final String arguments;
-
-  ToolCallFunction({
-    required this.name,
-    required this.arguments,
-  });
-
-  factory ToolCallFunction.fromJson(Map<String, dynamic> json) => _$ToolCallFunctionFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$ToolCallFunctionToJson(this);
-}
 
 class ResponseFormat {
   final String? type;
@@ -244,4 +96,3 @@ class StreamOptions {
     this.options,
   });
 }
-
