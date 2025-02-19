@@ -30,6 +30,8 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   var _sending = false;
   final _openAI = OpenAI(
     apiKey: dotenv.env['OPENAI_API_KEY'] ?? '',
+    organizationId: dotenv.env['OPENAI_ORGANIZATION_ID'],
+    projectId: dotenv.env['OPENAI_PROJECT_ID'],
   );
   var _multilineMessageEntered = false;
 
