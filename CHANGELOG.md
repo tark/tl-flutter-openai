@@ -1,4 +1,8 @@
-## 1.0.5+5
+## 1.0.6+7
+
+- Updated info about the project
+
+## 1.0.5+6
 
 - Added chat completion example
 
