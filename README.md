@@ -2,6 +2,8 @@
 
 This is an unofficial Dart client for [OpenAI](https://platform.openai.com/docs/api-reference) API.
 
+![Demo](assets/demo.gif)
+
 ## Features
 
 - Fully compatible with the official [OpenAI API](https://github.com/openai/openai-openapi)
