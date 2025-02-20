@@ -4,7 +4,7 @@ This is an unofficial Dart client for [OpenAI](https://platform.openai.com/docs/
 
 ![Demo](assets/demo.gif)
 
-<img src="assets/demo.gif" width="200" alt="Demo">
+<img src="assets/demo.gif" width="400" alt="Demo">
 
 ## Features
 
