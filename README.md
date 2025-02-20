@@ -2,8 +2,6 @@
 
 This is an unofficial Dart client for [OpenAI](https://platform.openai.com/docs/api-reference) API.
 
-![Demo](assets/demo.gif)
-
 <img src="assets/demo.gif" width="400" alt="Demo">
 
 ## Features
