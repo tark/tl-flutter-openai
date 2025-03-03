@@ -11,6 +11,17 @@ final textColorSecondary = Colors.white38;
 final textColorPrimary = Colors.white;
 final accentColor = Colors.blue;
 
+class UiMessage {
+  final UserMessage? userMessage;
+  final ChatCompletionMessage? chatCompletionMessage;
+
+  UiMessage({
+    this.userMessage,
+    this.chatCompletionMessage, //
+  });
+}
+
+//
 class ChatCompletionScreen extends StatefulWidget {
   const ChatCompletionScreen({super.key});
 
@@ -26,7 +37,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
   var _otherUserId = '';
   var _threadId = '';
   bool _showScrollToBottomButton = false;
-  var _messages = <Message>[];
+  var _messages = <UiMessage>[];
   var _sending = false;
   final _openAI = OpenAI(
     apiKey: dotenv.env['OPENAI_API_KEY'] ?? '',
@@ -59,7 +70,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         title: Text(
           'Chat completion example',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.white, //
           ),
         ),
         backgroundColor: Colors.grey[900],
@@ -67,10 +78,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: _messagesList(),
-            ),
-            _messageInput(context),
+            Expanded(child: _messagesList()), _messageInput(context), //
           ],
         ),
       ),
@@ -95,7 +103,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
             'This is an example of how chat completion works. Type a message and press send to get a response.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: textColorSecondary,
+              color: textColorSecondary, //
             ),
           ),
         ),
@@ -107,12 +115,20 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         ListView.separated(
           reverse: true,
           controller: _scrollController,
-          padding: EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           itemCount: _messages.length,
           separatorBuilder: (c, i) => const SizedBox(height: 8),
-          itemBuilder: (c, i) => _messageItem(_messages[i]),
+          itemBuilder: (c, i) {
+            if (_messages[i].userMessage != null) {
+              return _userMessageItem(_messages[i].userMessage!);
+            }
+
+            if (_messages[i].chatCompletionMessage != null) {
+              return _chatMessageItem(_messages[i].chatCompletionMessage!);
+            }
+
+            return SizedBox.shrink();
+          },
         ),
         Positioned(
           bottom: 20,
@@ -120,44 +136,41 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
           child: AnimatedOpacity(
             opacity: _showScrollToBottomButton ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 200),
-            child: _showScrollToBottomButton
-                ? Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _scrollToBottom,
-                      child: Container(
-                        height: 50,
-                        width: 50,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: backgroundColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.1),
-                              blurRadius: 10,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.arrow_downward,
-                          size: 16,
+            child:
+                _showScrollToBottomButton
+                    ? Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _scrollToBottom,
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: backgroundColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.arrow_downward, size: 16),
                         ),
                       ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
+                    )
+                    : const SizedBox.shrink(),
           ),
         ),
       ],
     );
   }
 
-  Widget _messageItem(Message message) {
+  Widget _userMessageItem(UserMessage message) {
     final text = message.content ?? '';
     final isShort = text.length < 30 && !text.contains('\n');
-    final isSender = message.role == 'user';
     final isEmpty = text.isEmpty;
 
     if (isEmpty) {
@@ -166,34 +179,48 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
 
     return Row(
       children: [
-        if (isSender)
-          isShort
-              ? const Spacer()
-              : const SizedBox(
-                  width: 50,
-                ),
+        isShort
+            ? const Spacer()
+            : const SizedBox(
+              width: 50, //
+            ),
         if (isShort)
-          _messageBody(message, isSender, isShort)
+          _messageBody(text, true, isShort)
         else
           Expanded(
-            child: _messageBody(message, isSender, isShort),
+            child: _messageBody(text, true, isShort), //
           ),
-        if (!isSender)
-          isShort
-              ? const Spacer()
-              : const SizedBox(
-                  width: 50,
-                ),
       ],
     );
   }
 
-  Widget _messageBody(
-    Message message,
-    bool isSender,
-    bool isShort,
-  ) {
+  Widget _chatMessageItem(ChatCompletionMessage message) {
     final text = message.content ?? '';
+    final isShort = text.length < 35 && !text.contains('\n');
+    final isEmpty = text.isEmpty;
+
+    if (isEmpty) {
+      return Container();
+    }
+
+    return Row(
+      children: [
+        if (isShort)
+          _messageBody(text, false, isShort)
+        else
+          Expanded(
+            child: _messageBody(text, false, isShort), //
+          ),
+        isShort
+            ? const Spacer()
+            : const SizedBox(
+              width: 50, //
+            ),
+      ],
+    );
+  }
+
+  Widget _messageBody(String text, bool isSender, bool isShort) {
     if (text.isEmpty) {
       return Container();
     }
@@ -203,61 +230,52 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
     final lastLineIsFull = (linesCount - linesCount.floor()) > 0.7;
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: 10,
-        horizontal: 16,
-      ),
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       decoration: BoxDecoration(
         color: isSender ? Colors.blue.withAlpha(150) : inputColor,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: isShort
-          ? Row(
-              children: [
-                GptMarkdown(
-                  text,
-                  style: TextStyle(
-                    color: isSender ? textColorPrimary : textColorPrimary,
-                  ),
-                ),
-              ],
-            )
-          : Stack(
-              children: [
-                Padding(
-                  padding: lastLineIsFull
-                      ? EdgeInsets.only(
-                          bottom: 16,
-                        )
-                      : EdgeInsets.all(0),
-                  child: GptMarkdown(
+      child:
+          isShort
+              ? Row(
+                children: [
+                  GptMarkdown(
                     text,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1000,
                     style: TextStyle(
                       color: isSender ? textColorPrimary : textColorPrimary,
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              )
+              : Stack(
+                children: [
+                  Padding(
+                    padding:
+                        lastLineIsFull
+                            ? EdgeInsets.only(bottom: 16)
+                            : EdgeInsets.all(0),
+                    child: GptMarkdown(
+                      text,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1000,
+                      style: TextStyle(
+                        color: isSender ? textColorPrimary : textColorPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 
   Widget _emptyChat(String chatName) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 20,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Column(
-              children: [
-                Text('Chat is empty'),
-              ],
-            ),
+            Column(children: [Text('Chat is empty')]),
           ],
         ),
       ),
@@ -312,17 +330,13 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 6,
-              ),
+              SizedBox(width: 6),
               SizedBox(
                 width: 48,
                 height: 48,
                 child: IconButton(
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      inputColor,
-                    ),
+                    backgroundColor: WidgetStateProperty.all(inputColor),
                   ),
                   icon: Icon(
                     Icons.arrow_upward,
@@ -353,18 +367,27 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
       final message = UserMessage(
         name: 'Airon',
         content: text,
+        // content: UserMessageContentPart(
+        //   parts: [TextContentPart(text: text)],
+        //   text: text,
+        // ),
       );
 
-      setState(() => _messages = [message, ..._messages]);
+      setState(() {
+        _messages = [
+          UiMessage(userMessage: message), ..._messages, //
+        ];
+      });
+
       _messageController.clear();
       _scrollToBottom();
 
-      // todo change to chatCompletion
-      // await _chatCubit.sendMessage(_threadId, text);
-      final response = await _openAI.createChatCompletion(ChatCompletionRequest(
-        messages: [message],
-        model: AIModel.chatgpt4oLatest,
-      ));
+      final response = await _openAI.createChatCompletion(
+        ChatCompletionRequest(
+          messages: [message],
+          model: AIModel.gpt4o, //
+        ),
+      );
 
       print('_onSendPressed - response: ${response.toJson()}');
       final responseMessage = response.choices?.first.message;
@@ -374,7 +397,12 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         return;
       }
 
-      setState(() => _messages = [responseMessage, ..._messages]);
+      setState(() {
+        _messages = [
+          UiMessage(chatCompletionMessage: responseMessage),
+          ..._messages,
+        ];
+      });
     } catch (e, stack) {
       print('_onSendPressed - ${e}, ${stack}');
       showError(context, e.toString());
@@ -409,57 +437,50 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
 //
 
 void showError(BuildContext context, String? error) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    behavior: SnackBarBehavior.floating,
-    elevation: 0,
-    content: Text(
-      error ?? 'Null',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      elevation: 0,
+      content: Text(
+        error ?? 'Null',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        maxLines: 10,
       ),
-      maxLines: 10,
+      backgroundColor: Colors.red,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
-    backgroundColor: Colors.red,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ));
+  );
 }
 
 void showSuccess(BuildContext context, String? message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    behavior: SnackBarBehavior.floating,
-    elevation: 0,
-    content: Text(
-      message ?? 'Null',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      elevation: 0,
+      content: Text(
+        message ?? 'Null',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        maxLines: 10,
       ),
-      maxLines: 10,
+      backgroundColor: Colors.green,
+      duration: const Duration(seconds: 1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
-    backgroundColor: Colors.green,
-    duration: const Duration(seconds: 1),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ));
+  );
 }
 
 void showInfo(BuildContext context, String? message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    behavior: SnackBarBehavior.floating,
-    content: Text(
-      message ?? 'Null',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w600,
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      content: Text(
+        message ?? 'Null',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
+      backgroundColor: Colors.blue[700],
+      duration: const Duration(seconds: 1),
     ),
-    backgroundColor: Colors.blue[700],
-    duration: const Duration(seconds: 1),
-  ));
+  );
 }
 
 Future<T?> showBottomModal<T>({
@@ -471,15 +492,11 @@ Future<T?> showBottomModal<T>({
     isScrollControlled: true,
     context: context,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(16),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (c) {
       return ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         child: ColoredBox(
           color: backgroundColor ?? Colors.grey,
           child: Padding(
@@ -490,22 +507,19 @@ Future<T?> showBottomModal<T>({
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(
-                    top: 12,
-                  ),
+                  padding: EdgeInsets.only(top: 12),
                   child: Container(
                     height: 5,
                     width: 35,
                     decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.1),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
-                builder(c)
+                builder(c),
               ],
             ),
           ),
