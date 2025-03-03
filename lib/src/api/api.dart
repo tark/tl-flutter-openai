@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 
 import '../../tl_flutter_openai.dart';
 import '../config/constants.dart';
-import '../models/chat_completion_response.dart';
 import '../models/models.dart';
 import '../util/log.dart';
 import 'main_interceptor.dart';
@@ -33,20 +32,12 @@ class Api {
   final String? projectId;
   late final Dio _dio;
 
-  Future<ChatCompletionResponse> createChatCompletion(ChatCompletionRequest request) async {
-    l('createChatCompletion', 'request:               ${request.toJson()}');
-    l('createChatCompletion', 'request first message: ${request.messages.first.toJson()}');
-
-    final x = UserMessage(content: '');
-    x.toJson();
-
+  Future<ChatCompletion> createChatCompletion(ChatCompletionRequest request) async {
     final response = await _post(
       'chat/completions',
       body: request.toJson(),
     );
-    l('createChatCompletion - response: $response');
-
-    return ChatCompletionResponse.fromJson(response ?? {});
+    return ChatCompletion.fromJson(response ?? {});
   }
 
   //
