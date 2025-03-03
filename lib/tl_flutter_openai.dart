@@ -1,4 +1,4 @@
-library tl_flutter_openai;
+library;
 
 export 'src/tl_flutter_openai.dart';
 export 'src/models/models.dart';
