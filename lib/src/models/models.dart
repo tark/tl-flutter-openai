@@ -57,7 +57,6 @@ class ChatCompletionRequest {
   Map<String, dynamic> toJson() => _$ChatCompletionRequestToJson(this);
 }
 
-
 class ResponseFormat {
   final String? type;
   final Map<String, dynamic>? jsonSchema;
