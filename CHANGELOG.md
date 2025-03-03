@@ -1,4 +1,8 @@
-## 1.0.6+7
+## 1.0.8+9
+
+- Improve chat completion logic, add content parts
+
+## 1.0.7+8
 
 - Updated README.md
 
