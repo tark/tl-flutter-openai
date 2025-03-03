@@ -4,13 +4,10 @@ part 'message.g.dart';
 
 @JsonSerializable(createFactory: false, createToJson: false)
 abstract class Message {
-  /// The role of the messages author, in this case `user`.
   final String role;
-  final String content;
 
   Message({
     required this.role,
-    required this.content,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -31,17 +28,17 @@ abstract class Message {
   Map<String, dynamic> toJson();
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class DeveloperMessage extends Message {
-
+  final String content;
   final String? name;
 
   DeveloperMessage({
-    required super.content,
+    required this.content,
     this.name,
   }) : super(
-    role: 'developer',
-  );
+          role: 'developer',
+        );
 
   factory DeveloperMessage.fromJson(Map<String, dynamic> json) =>
       _$DeveloperMessageFromJson(json);
@@ -50,16 +47,17 @@ class DeveloperMessage extends Message {
   Map<String, dynamic> toJson() => _$DeveloperMessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class SystemMessage extends Message {
+  final String content;
   final String? name;
 
   SystemMessage({
-    required super.content,
+    required this.content,
     this.name,
   }) : super(
-    role: 'system',
-  );
+          role: 'system',
+        );
 
   factory SystemMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemMessageFromJson(json);
@@ -70,32 +68,33 @@ class SystemMessage extends Message {
 
 /// Messages sent by an end user, containing prompts or additional
 /// context information.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UserMessage extends Message {
   /// The contents of the user message.
 
   /// An optional name for the participant. Provides the model information
   /// to differentiate between participants of the same role.
+  final String? content;
+  final List<ContentPart>? contentParts;
   final String? name;
 
   UserMessage({
-    required super.content,
+    this.content,
+    this.contentParts,
     this.name,
-  }) : super(
-    role: 'user',
-  );
+  }) : super(role: 'user');
 
   factory UserMessage.fromJson(Map<String, dynamic> json) =>
       _$UserMessageFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => {
-    ..._$UserMessageToJson(this),
-    'role': role,
-  };
+        ..._$UserMessageToJson(this),
+        'role': role,
+      };
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class AssistantMessage extends Message {
   final String? refusal;
   final String? name;
@@ -103,14 +102,14 @@ class AssistantMessage extends Message {
   final List<ToolCall>? toolCalls;
 
   AssistantMessage({
-    super.content = '',
+    // required this.content,
     this.refusal,
     this.name,
     this.audio,
     this.toolCalls,
   }) : super(
-    role: 'assistant',
-  );
+          role: 'assistant',
+        );
 
   factory AssistantMessage.fromJson(Map<String, dynamic> json) =>
       _$AssistantMessageFromJson(json);
@@ -119,7 +118,7 @@ class AssistantMessage extends Message {
   Map<String, dynamic> toJson() => _$AssistantMessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class AssistantMessageAudio {
   final String id;
 
@@ -134,7 +133,7 @@ class AssistantMessageAudio {
   Map<String, dynamic> toJson() => _$AssistantMessageAudioToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ToolCall {
   final String id;
   final String type;
@@ -153,7 +152,7 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ToolCallFunction {
   final String name;
   final String arguments;
@@ -168,4 +167,94 @@ class ToolCallFunction {
 
   @override
   Map<String, dynamic> toJson() => _$ToolCallFunctionToJson(this);
+}
+
+@JsonSerializable(createFactory: false, createToJson: false)
+abstract class ContentPart {
+  ContentPart({required this.type});
+
+  final String type;
+
+  factory ContentPart.fromJson(Map<String, dynamic> json) {
+    switch (json['type']) {
+      case 'text':
+        return TextContentPart.fromJson(json);
+      case 'image_url':
+        return ImageContentPart.fromJson(json);
+      case 'input_audio':
+        return AudioContentPart.fromJson(json);
+      default:
+        throw ArgumentError('Unknown type: ${json['type']}');
+    }
+  }
+
+  Map<String, dynamic> toJson();
+}
+
+@JsonSerializable(explicitToJson: true)
+class TextContentPart extends ContentPart {
+  TextContentPart({
+    required this.text,
+  }) : super(
+          type: 'text',
+        );
+
+  final String text;
+
+  factory TextContentPart.fromJson(Map<String, dynamic> json) =>
+      _$TextContentPartFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$TextContentPartToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class ImageContentPart extends ContentPart {
+  ImageContentPart({
+    required this.imageUrl,
+  }) : super(
+          type: 'image_url',
+        );
+
+  final ImageUrl imageUrl;
+
+  factory ImageContentPart.fromJson(Map<String, dynamic> json) =>
+      _$ImageContentPartFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ImageContentPartToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class ImageUrl {
+  ImageUrl({
+    required this.url,
+    required this.detail,
+  });
+
+  final String url;
+  final String detail;
+
+  factory ImageUrl.fromJson(Map<String, dynamic> json) =>
+      _$ImageUrlFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ImageUrlToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AudioContentPart extends ContentPart {
+  AudioContentPart({
+    required this.imageUrl,
+  }) : super(
+          type: 'input_audio',
+        );
+
+  final ImageUrl imageUrl;
+
+  factory AudioContentPart.fromJson(Map<String, dynamic> json) =>
+      _$AudioContentPartFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$AudioContentPartToJson(this);
 }
