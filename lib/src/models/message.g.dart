@@ -6,18 +6,6 @@ part of 'message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-DeveloperMessage _$DeveloperMessageFromJson(Map<String, dynamic> json) =>
-    DeveloperMessage(
-      content: json['content'] as String,
-      name: json['name'] as String?,
-    );
-
-Map<String, dynamic> _$DeveloperMessageToJson(DeveloperMessage instance) =>
-    <String, dynamic>{
-      'content': instance.content,
-      'name': instance.name,
-    };
-
 SystemMessage _$SystemMessageFromJson(Map<String, dynamic> json) =>
     SystemMessage(
       content: json['content'] as String,

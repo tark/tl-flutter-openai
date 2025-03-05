@@ -18,33 +18,12 @@ abstract class Message {
         return AssistantMessage.fromJson(json);
       case 'system':
         return SystemMessage.fromJson(json);
-      case 'developer':
-        return DeveloperMessage.fromJson(json);
       default:
         throw ArgumentError('Unknown animal type: ${json['type']}');
     }
   }
 
   Map<String, dynamic> toJson();
-}
-
-@JsonSerializable(explicitToJson: true)
-class DeveloperMessage extends Message {
-  final String content;
-  final String? name;
-
-  DeveloperMessage({
-    required this.content,
-    this.name,
-  }) : super(
-          role: 'developer',
-        );
-
-  factory DeveloperMessage.fromJson(Map<String, dynamic> json) =>
-      _$DeveloperMessageFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$DeveloperMessageToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -63,7 +42,10 @@ class SystemMessage extends Message {
       _$SystemMessageFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$SystemMessageToJson(this);
+  Map<String, dynamic> toJson() => {
+    ..._$SystemMessageToJson(this),
+    'role': role,
+  };
 }
 
 /// Messages sent by an end user, containing prompts or additional
