@@ -1,3 +1,5 @@
+import 'dart:js/js_wasm.dart';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -41,20 +43,55 @@ enum AIModel {
 
 @JsonSerializable(explicitToJson: true)
 class ChatCompletionRequest {
-  final List<Message> messages;
-  final AIModel model;
-  final bool store;
-
   ChatCompletionRequest({
     required this.messages,
     required this.model,
     this.store = false,
+    this.reasoningEffort,
+    this.metadata,
+    this.frequencyPenalty,
+    this.logitBias,
+    this.logprobs,
+    this.topLogprobs,
+    this.maxCompletionTokens,
+    this.n,
+    this.modalities,
+    this.prediction,
   });
+
+  final List<Message>? messages;
+  final AIModel? model;
+  final bool? store;
+  @JsonKey(name: 'reasoning_effort')
+  final String? reasoningEffort;
+  final Map<String, dynamic>? metadata;
+  @JsonKey(name: 'frequency_penalty')
+  final int? frequencyPenalty;
+  @JsonKey(name: 'logit_bias')
+  final Map<String, dynamic>? logitBias;
+  final bool? logprobs;
+  @JsonKey(name: 'top_logprobs')
+  final int? topLogprobs;
+  @JsonKey(name: 'max_completion_tokens')
+  final int? maxCompletionTokens;
+  final int? n;
+  final List<String>? modalities;
+  final List<String>? prediction;
 
   factory ChatCompletionRequest.fromJson(Map<String, dynamic> json) =>
       _$ChatCompletionRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$ChatCompletionRequestToJson(this);
+}
+
+class StaticContent {
+  final String type;
+  final String content;
+
+  StaticContent({
+    required this.type,
+    required this.content,
+  });
 }
 
 class ResponseFormat {

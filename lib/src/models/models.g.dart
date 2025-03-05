@@ -9,19 +9,41 @@ part of 'models.dart';
 ChatCompletionRequest _$ChatCompletionRequestFromJson(
         Map<String, dynamic> json) =>
     ChatCompletionRequest(
-      messages: (json['messages'] as List<dynamic>)
-          .map((e) => Message.fromJson(e as Map<String, dynamic>))
+      messages: (json['messages'] as List<dynamic>?)
+          ?.map((e) => Message.fromJson(e as Map<String, dynamic>))
           .toList(),
-      model: $enumDecode(_$AIModelEnumMap, json['model']),
+      model: $enumDecodeNullable(_$AIModelEnumMap, json['model']),
       store: json['store'] as bool? ?? false,
+      reasoningEffort: json['reasoning_effort'] as String?,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+      frequencyPenalty: (json['frequency_penalty'] as num?)?.toInt(),
+      logitBias: json['logit_bias'] as Map<String, dynamic>?,
+      logprobs: json['logprobs'] as bool?,
+      topLogprobs: (json['top_logprobs'] as num?)?.toInt(),
+      n: (json['n'] as num?)?.toInt(),
+      modalities: (json['modalities'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      prediction: (json['prediction'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$ChatCompletionRequestToJson(
         ChatCompletionRequest instance) =>
     <String, dynamic>{
-      'messages': instance.messages.map((e) => e.toJson()).toList(),
-      'model': _$AIModelEnumMap[instance.model]!,
+      'messages': instance.messages?.map((e) => e.toJson()).toList(),
+      'model': _$AIModelEnumMap[instance.model],
       'store': instance.store,
+      'reasoning_effort': instance.reasoningEffort,
+      'metadata': instance.metadata,
+      'frequency_penalty': instance.frequencyPenalty,
+      'logit_bias': instance.logitBias,
+      'logprobs': instance.logprobs,
+      'top_logprobs': instance.topLogprobs,
+      'n': instance.n,
+      'modalities': instance.modalities,
+      'prediction': instance.prediction,
     };
 
 const _$AIModelEnumMap = {
