@@ -1,3 +1,8 @@
+## 1.0.9+10
+
+- Add system roles to the example
+- Added different fields to the `ChatCompletionRequest`
+
 ## 1.0.8+9
 
 - Improve chat completion logic, add content parts
