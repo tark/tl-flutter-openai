@@ -45,6 +45,7 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
     projectId: dotenv.env['OPENAI_PROJECT_ID'],
   );
   var _multilineMessageEntered = false;
+  var _systemType = 'friend';
 
   @override
   void initState() {
@@ -78,7 +79,23 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(child: _messagesList()), _messageInput(context), //
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 10),
+                Expanded(child: _systemTypeButton('friend')),
+                const SizedBox(width: 10),
+                Expanded(child: _systemTypeButton('boss')),
+                const SizedBox(width: 10),
+                Expanded(child: _systemTypeButton('mom')),
+                const SizedBox(width: 10),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: _messagesList(), //
+            ),
+            _messageInput(context), //
           ],
         ),
       ),
@@ -365,17 +382,15 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
       setState(() => _sending = true);
 
       final message = UserMessage(
-        name: 'Airon',
-        content: text,
-        // content: UserMessageContentPart(
-        //   parts: [TextContentPart(text: text)],
-        //   text: text,
-        // ),
+        content: text, //
       );
 
       setState(() {
         _messages = [
-          UiMessage(userMessage: message), ..._messages, //
+          UiMessage(
+            userMessage: message, //
+          ),
+          ..._messages, //
         ];
       });
 
@@ -384,7 +399,17 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
 
       final response = await _openAI.createChatCompletion(
         ChatCompletionRequest(
-          messages: [message],
+          messages: [
+            message,
+            SystemMessage(
+              content: switch (_systemType) {
+                'friend' => 'You are my best friend. Be supportive and humorous.',
+                'boss' => 'You are my boss. Be assertive and tell me what to do.',
+                'mom' => 'You are my mom. Be caring and loving.',
+                final _ => 'You are the robot. Be robotic and logical.',
+              }, //
+            ),
+          ],
           model: AIModel.gpt4o, //
         ),
       );
@@ -431,6 +456,37 @@ class _ChatCompletionScreenState extends State<ChatCompletionScreen> {
         _scrollController.jumpTo(0);
       }
     });
+  }
+
+  Widget _systemTypeButton(String type) {
+    return Material(
+      borderRadius: BorderRadius.circular(8),
+      color: inputColor,
+      child: InkWell(
+        onTap: () => setState(() => _systemType = type),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              width: 1.5,
+              color: type == _systemType ? Colors.white : Colors.transparent, //
+            ),
+          ),
+          child: Text(
+            type.toUpperCase(),
+            style: TextStyle(
+              color: type == _systemType ? Colors.white : Colors.white54,
+              fontSize: 12,
+              fontWeight:
+                  type == _systemType ? FontWeight.w700 : FontWeight.w400,
+            ),
+          ), //
+        ),
+      ),
+    );
   }
 }
 
